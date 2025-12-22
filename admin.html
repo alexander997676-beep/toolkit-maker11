@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Panel - FAIZAN</title>
+    <style>
+        body { background: #000; color: #0f0; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .panel { border: 2px solid #0f0; padding: 40px; border-radius: 10px; box-shadow: 0 0 20px #0f0; width: 350px; text-align: center; }
+        
+        /* Login Screen */
+        #loginScreen { display: block; }
+        #controlScreen { display: none; }
+
+        input { width: 90%; padding: 10px; background: #111; border: 1px solid #333; color: white; margin-bottom: 10px; text-align: center; }
+        button { width: 100%; padding: 10px; background: #0f0; border: none; font-weight: bold; cursor: pointer; }
+        
+        .key-display { margin-top: 20px; font-size: 1.2rem; color: yellow; border: 1px dashed yellow; padding: 10px; word-break: break-all; display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- LOGIN -->
+    <div class="panel" id="loginScreen">
+        <h2>🔒 OWNER LOGIN</h2>
+        <input type="password" id="adminPass" placeholder="Enter Owner Password">
+        <button onclick="login()">ACCESS PANEL</button>
+    </div>
+
+    <!-- CONTROL PANEL -->
+    <div class="panel" id="controlScreen">
+        <h2>⚡ GENERATE KEY</h2>
+        <p>Enter the User's Website Name to generate a Premium Key.</p>
+        
+        <input type="text" id="siteName" placeholder="User Website Name (e.g. AliTools)">
+        <select id="duration" style="width:100%; padding:10px; margin-bottom:10px;">
+            <option value="lifetime">Lifetime Premium 💎</option>
+        </select>
+        
+        <button onclick="genKey()">CREATE KEY 🔑</button>
+
+        <div id="result" class="key-display"></div>
+    </div>
+
+    <script>
+        // OWNER PASSWORD ( Change this if you want )
+        const PASS = "faizan123";
+
+        function login() {
+            if(document.getElementById('adminPass').value === PASS) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('controlScreen').style.display = 'block';
+            } else {
+                alert("Wrong Password!");
+            }
+        }
+
+        function genKey() {
+            const name = document.getElementById('siteName').value.trim();
+            if(!name) return alert("Enter Site Name");
+
+            // SECRET ALGORITHM (Must match User file)
+            const raw = name + "FAIZAN_SECRET_SYSTEM_2025";
+            const key = btoa(raw).substring(0, 12); // Creates a 12 digit code
+
+            const res = document.getElementById('result');
+            res.style.display = 'block';
+            res.innerHTML = "PREMIUM KEY:<br><br>" + key;
+        }
+    </script>
+</body>
+</html>
