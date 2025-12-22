@@ -1,101 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>My Toolkit</title>
-<style>
-    body { background: #111; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
-    
-    /* TOOLKIT UI */
-    .container { max-width: 600px; margin: 0 auto; }
-    h1 { color: #00e0ff; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
-    .card { background: #222; padding: 20px; border-radius: 10px; text-decoration: none; color: white; border: 1px solid #333; display: block; }
-    .card:hover { border-color: #00e0ff; }
-
-    /* LOCK SCREEN UI */
-    #lockScreen {
-        position: fixed; inset: 0; background: #000; z-index: 9999;
-        display: none; flex-direction: column; align-items: center; justify-content: center;
-    }
-    .lock-box { background: #1a1a1a; padding: 30px; border: 2px solid red; border-radius: 15px; width: 90%; max-width: 400px; }
-    input { padding: 10px; width: 80%; margin-top: 15px; text-align: center; }
-    button { padding: 10px 20px; background: red; color: white; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Toolkit</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        body { background: #111; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
+        input { padding: 10px; width: 80%; margin: 10px 0; }
+        button { padding: 15px; background: #00e0ff; border: none; cursor: pointer; font-weight: bold; width: 80%; }
+        textarea { width: 80%; height: 100px; margin-top: 20px; background: black; color: #0f0; }
+    </style>
 </head>
 <body>
 
-    <!-- LOCK OVERLAY -->
-    <div id="lockScreen">
-        <div class="lock-box">
-            <h1 style="margin:0">⛔ EXPIRED</h1>
-            <p>Your 24-Hour Trial has ended.</p>
-            <p style="color:#888; font-size:0.9rem;">Contact Owner to get Premium Key.</p>
+    <h1>🛠️ Create Your Toolkit</h1>
+    <input type="text" id="sName" placeholder="Website Name (Unique)">
+    <button onclick="createSite()">CREATE & GENERATE CODE</button>
+    
+    <textarea id="output" placeholder="Code will appear here..."></textarea>
+
+    <script>
+        // --- ⚠️ WAHI SAME FIREBASE CONFIG YAHAN BHI DALEN ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyD...",
+            authDomain: "your-project.firebaseapp.com",
+            databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123...",
+            appId: "1:123..."
+        };
+        // ----------------------------------------------------
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        function createSite() {
+            const name = document.getElementById('sName').value.trim();
+            if(!name) return alert("Please enter website name");
+
+            // 1. Send Data to Admin
+            db.ref('sites').push({
+                name: name,
+                time: Date.now()
+            });
+
+            // 2. Generate Code (Standard Locked Code)
+            const code = `<!DOCTYPE html>
+<html>
+<head><title>${name}</title></head>
+<body style="background:black; color:white; text-align:center;">
+    <h1>${name}</h1>
+    <div id="lock" style="display:none; position:fixed; inset:0; background:black; align-items:center; justify-content:center; flex-direction:column;">
+        <h2 style="color:red">LOCKED</h2>
+        <input id="k" placeholder="Key"><button onclick="u()">Unlock</button>
+    </div>
+    <script>
+        // LOCK LOGIC
+        const n = "${name}";
+        const t = localStorage.getItem('t_'+n) || Date.now();
+        localStorage.setItem('t_'+n, t);
+        
+        // 24 Hours Check
+        if(Date.now() - t > 86400000 && !localStorage.getItem('p_'+n)) {
+            document.getElementById('lock').style.display = 'flex';
+        }
+
+        function u() {
+            // Check Key
+            if(document.getElementById('k').value === btoa(n+"FAIZAN_SECRET_SYSTEM_2025").substring(0,12)) {
+                localStorage.setItem('p_'+n, "1"); location.reload();
+            } else alert("Wrong Key");
+        }
+    <\/script>
+</body>
+</html>`;
             
-            <input type="text" id="keyInput" placeholder="Enter Key Here">
-            <button onclick="unlock()">UNLOCK NOW</button>
-            <p id="msg" style="color:red; margin-top:10px;"></p>
-        </div>
-    </div>
-
-    <!-- MAIN TOOLKIT -->
-    <div class="container">
-        <!-- SITE NAME (Important for Key) -->
-        <h1 id="siteTitle">AliTools</h1> 
-        
-        <div class="grid">
-            <a href="https://chat.openai.com" class="card">🤖 ChatGPT</a>
-            <a href="https://www.remove.bg" class="card">🖼️ BG Remover</a>
-            <a href="https://temp-mail.org" class="card">📧 Temp Mail</a>
-            <a href="#" class="card">🔥 More Tools</a>
-        </div>
-        
-        <p style="margin-top:50px; color:#555;">Powered by FAIZAN</p>
-    </div>
-
-<script>
-    // --- SETTINGS ---
-    const SITE_NAME = "AliTools"; // YE NAME CHANGE KARNAY PAR KEY BHI CHANGE HOGI
-    document.getElementById('siteTitle').innerText = SITE_NAME;
-
-    // --- LOCK LOGIC ---
-    const now = new Date().getTime();
-    const startKey = 'fz_start_' + SITE_NAME;
-    const premKey = 'fz_prem_' + SITE_NAME;
-
-    // 1. Check if already Premium
-    if(localStorage.getItem(premKey) !== "true") {
-        
-        // 2. Check Time
-        let startTime = localStorage.getItem(startKey);
-        if(!startTime) {
-            startTime = now;
-            localStorage.setItem(startKey, now);
+            document.getElementById('output').value = code;
+            alert("Site Created! Admin has received your request.");
         }
-
-        // 3. Compare Time (24 Hours = 86400000 ms)
-        // TEST MODE: 10 seconds (10000) change to 86400000 for 24h
-        if(now - startTime > 86400000) { 
-            document.getElementById('lockScreen').style.display = 'flex';
-        }
-    }
-
-    function unlock() {
-        const input = document.getElementById('keyInput').value;
-        const msg = document.getElementById('msg');
-
-        // KEY GENERATION LOGIC (Matches Admin Panel)
-        const correctKey = btoa(SITE_NAME + "FAIZAN_SECRET_SYSTEM_2025").substring(0, 12);
-
-        if(input === correctKey) {
-            localStorage.setItem(premKey, "true");
-            alert("✅ APPROVED! Website Unlocked.");
-            location.reload();
-        } else {
-            msg.innerText = "Invalid Key!";
-        }
-    }
-</script>
+    </script>
 </body>
 </html>
