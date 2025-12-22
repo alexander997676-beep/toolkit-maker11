@@ -1,332 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FAIZAN ADMIN OS 🔐</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Outfit:wght@300;500;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --bg: #030005;
-            --panel: #0a0a0f;
-            --primary: #00f2ff; /* Cyan */
-            --secondary: #7000ff; /* Purple */
-            --text: #fff;
-            --border: #222;
-        }
-
-        * { box-sizing: border-box; }
-
-        body {
-            margin: 0; padding: 0;
-            background: var(--bg); color: var(--text);
-            font-family: 'Outfit', sans-serif;
-            height: 100vh; overflow: hidden;
-            display: flex; justify-content: center; align-items: center;
-            background-image: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #000 100%);
-        }
-
-        /* --- AUTH SCREEN (LOGIN/SIGNUP) --- */
-        .auth-container {
-            width: 380px; background: rgba(10, 10, 15, 0.8);
-            border: 1px solid var(--primary);
-            border-radius: 20px; padding: 30px;
-            text-align: center; box-shadow: 0 0 50px rgba(0, 242, 255, 0.15);
-            backdrop-filter: blur(10px);
-            animation: float 6s infinite ease-in-out;
-        }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-
-        .auth-logo { font-family: 'Rajdhani', sans-serif; font-size: 2.5rem; color: var(--primary); font-weight: 800; text-transform: uppercase; margin-bottom: 5px; text-shadow: 0 0 10px var(--primary); }
-        .auth-sub { font-size: 0.8rem; color: #888; margin-bottom: 30px; }
-
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { display: block; font-size: 0.75rem; color: var(--primary); margin-bottom: 5px; font-weight: 700; letter-spacing: 1px; }
-        .auth-input { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: white; border-radius: 8px; outline: none; transition: 0.3s; }
-        .auth-input:focus { border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
-
-        .btn-auth {
-            width: 100%; padding: 14px; background: linear-gradient(90deg, var(--primary), var(--secondary));
-            color: white; border: none; border-radius: 8px; font-weight: 800; font-size: 1rem;
-            cursor: pointer; margin-top: 10px; transition: 0.3s;
-        }
-        .btn-auth:hover { transform: scale(1.02); box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
-
-        .switch-link { margin-top: 15px; font-size: 0.8rem; color: #666; cursor: pointer; }
-        .switch-link span { color: var(--primary); font-weight: bold; }
-
-        /* --- DASHBOARD (HIDDEN INITIALLY) --- */
-        .dashboard {
-            display: none; /* Hidden by default */
-            width: 100%; height: 100%;
-            flex-direction: row;
-        }
-
-        .dash-sidebar {
-            width: 300px; background: #0a0a0f; border-right: 1px solid #333;
-            display: flex; flex-direction: column; padding: 20px;
-        }
-        .dash-user {
-            background: linear-gradient(45deg, #111, #222); padding: 15px; border-radius: 12px;
-            border: 1px solid #333; margin-bottom: 30px; display: flex; align-items: center; gap: 10px;
-        }
-        .user-avatar { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: black; }
-        
-        .dash-main { flex: 1; padding: 40px; overflow-y: auto; background: #050505; }
-        
-        /* TOOL MAKER UI */
-        .maker-card {
-            background: #0f1015; border: 1px solid #333; border-radius: 20px;
-            padding: 30px; max-width: 800px; margin: 0 auto;
-        }
-        .maker-header { font-family: 'Rajdhani', sans-serif; font-size: 2rem; color: white; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-
-        .row { display: flex; gap: 10px; }
-        
-        .tool-list { margin-top: 20px; border: 1px solid #333; padding: 10px; border-radius: 10px; min-height: 100px; }
-        .tool-item { background: #1a1a1a; padding: 10px; margin-bottom: 5px; border-radius: 5px; display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; }
-
-        /* MODAL */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; }
-        .modal-box { background: #111; padding: 30px; border: 2px solid var(--primary); border-radius: 20px; width: 90%; max-width: 500px; text-align: center; }
-        textarea { width: 100%; height: 150px; background: black; color: #0f0; border: 1px solid #333; margin-top: 10px; padding: 10px; }
-
-    </style>
-</head>
-<body>
-
-    <!-- 1. AUTH SCREEN -->
-    <div class="auth-container" id="authScreen">
-        <div class="auth-logo">FAIZAN OS</div>
-        <div class="auth-sub">Secure Admin Access</div>
-
-        <!-- LOGIN FORM -->
-        <div id="loginForm">
-            <div class="input-group">
-                <label>USERNAME</label>
-                <input type="text" id="lUser" class="auth-input" placeholder="Enter username">
-            </div>
-            <div class="input-group">
-                <label>PASSWORD</label>
-                <input type="password" id="lPass" class="auth-input" placeholder="Enter password">
-            </div>
-            <button class="btn-auth" onclick="login()">LOGIN TO PANEL</button>
-            <div class="switch-link" onclick="showSignup()">New here? <span>Create Account</span></div>
-        </div>
-
-        <!-- SIGNUP FORM -->
-        <div id="signupForm" style="display:none">
-            <div class="input-group">
-                <label>CHOOSE USERNAME</label>
-                <input type="text" id="sUser" class="auth-input" placeholder="Create username">
-            </div>
-            <div class="input-group">
-                <label>CHOOSE PASSWORD</label>
-                <input type="password" id="sPass" class="auth-input" placeholder="Create password">
-            </div>
-            <button class="btn-auth" onclick="signup()">CREATE ACCOUNT</button>
-            <div class="switch-link" onclick="showLogin()">Already have account? <span>Login</span></div>
-        </div>
-    </div>
-
-    <!-- 2. DASHBOARD (Hidden until login) -->
-    <div class="dashboard" id="dashScreen">
-        <!-- SIDEBAR -->
-        <div class="dash-sidebar">
-            <div class="dash-user">
-                <div class="user-avatar" id="avatar">U</div>
-                <div>
-                    <div style="font-size:0.7rem; color:#888;">WELCOME BACK</div>
-                    <div style="font-weight:bold; font-size:1.1rem;" id="displayUser">User</div>
-                </div>
-            </div>
-
-            <div style="color:#666; font-size:0.8rem; margin-bottom:10px;">MENU</div>
-            <button class="btn-auth" style="background:#222; border:1px solid #333; margin-bottom:10px;">🛠️ Toolkit Creator</button>
-            <button class="btn-auth" style="background:#222; border:1px solid #333; margin-top:auto;" onclick="logout()">🛑 LOGOUT</button>
-        </div>
-
-        <!-- MAIN MAKER -->
-        <div class="dash-main">
-            <div class="maker-card">
-                <div class="maker-header">Create Premium Toolkit 💎</div>
-                
-                <div class="input-group">
-                    <label>WEBSITE NAME (For License System)</label>
-                    <input type="text" id="siteName" class="auth-input" placeholder="e.g. MySuperTools">
-                </div>
-
-                <div class="row">
-                    <div class="input-group" style="flex:1">
-                        <label>TOOL NAME</label>
-                        <input type="text" id="tName" class="auth-input">
-                    </div>
-                    <div class="input-group" style="flex:1">
-                        <label>TOOL LINK</label>
-                        <input type="text" id="tLink" class="auth-input">
-                    </div>
-                </div>
-                <button class="btn-auth" style="background:#333; border:1px solid #555;" onclick="addTool()">+ ADD TOOL</button>
-
-                <div class="tool-list" id="toolList">
-                    <div style="text-align:center; color:#666; padding-top:30px;">Added tools will appear here...</div>
-                </div>
-
-                <br>
-                <button class="btn-auth" onclick="generate()">🚀 GENERATE & LOCK (24H)</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CODE MODAL -->
-    <div class="modal" id="modal">
-        <div class="modal-box">
-            <h2 style="color:var(--primary)">SUCCESS! 🔒</h2>
-            <p style="color:#ccc; font-size:0.9rem;">This code will expire in 24 hours.</p>
-            <textarea id="finalCode" readonly></textarea>
-            <button class="btn-auth" onclick="copyCode()">COPY CODE</button>
-            <button class="btn-auth" style="background:transparent; border:1px solid #333; margin-top:10px;" onclick="closeModal()">CLOSE</button>
-        </div>
-    </div>
-
-<script>
-    // --- AUTHENTICATION SYSTEM ---
-    function showSignup() {
-        document.getElementById('loginForm').style.display = 'none';
-        document.getElementById('signupForm').style.display = 'block';
-    }
-    function showLogin() {
-        document.getElementById('signupForm').style.display = 'none';
-        document.getElementById('loginForm').style.display = 'block';
-    }
-
-    function signup() {
-        const u = document.getElementById('sUser').value;
-        const p = document.getElementById('sPass').value;
-        if(!u || !p) return alert("Fill all fields");
-
-        localStorage.setItem('faizan_user_' + u, p); // Save to browser
-        alert("Account Created! Please Login.");
-        showLogin();
-    }
-
-    function login() {
-        const u = document.getElementById('lUser').value;
-        const p = document.getElementById('lPass').value;
-        
-        const savedPass = localStorage.getItem('faizan_user_' + u);
-        
-        if(savedPass === p) {
-            // Login Success
-            document.getElementById('authScreen').style.display = 'none';
-            document.getElementById('dashScreen').style.display = 'flex';
-            document.getElementById('displayUser').innerText = u;
-            document.getElementById('avatar').innerText = u.charAt(0).toUpperCase();
-        } else {
-            alert("Wrong Username or Password!");
-        }
-    }
-
-    function logout() {
-        location.reload();
-    }
-
-
-    // --- TOOLKIT GENERATOR SYSTEM ---
-    let tools = [];
-
-    function addTool() {
-        const n = document.getElementById('tName').value;
-        const l = document.getElementById('tLink').value;
-        if(!n || !l) return;
-        
-        tools.push({name: n, link: l});
-        renderTools();
-        document.getElementById('tName').value = '';
-        document.getElementById('tLink').value = '';
-    }
-
-    function renderTools() {
-        const list = document.getElementById('toolList');
-        list.innerHTML = '';
-        tools.forEach((t, i) => {
-            list.innerHTML += `<div class="tool-item"><span>${t.name}</span> <span style="color:red; cursor:pointer;" onclick="tools.splice(${i},1); renderTools()">×</span></div>`;
-        });
-    }
-
-    function generate() {
-        const site = document.getElementById('siteName').value;
-        if(!site) return alert("Enter Website Name (Important for Lock)");
-        if(!tools.length) return alert("Add Tools first");
-
-        // THE PREMIUM EXPIRED CODE
-        const code = `<!DOCTYPE html>
-<html lang="en">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>${site}</title>
+<title>My Toolkit</title>
 <style>
-    body { background: #000; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 600px; margin: 0 auto; }
-    .card { background: #111; border: 1px solid #00f2ff; padding: 20px; border-radius: 10px; color: white; text-decoration: none; display: block; font-weight: bold; }
+    body { background: #111; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 20px; }
     
-    #lock { position: fixed; inset: 0; background: #050505; z-index: 999; display: none; flex-direction: column; justify-content: center; align-items: center; }
-    input { padding: 10px; margin-top: 10px; width: 200px; text-align: center; }
-    button { padding: 10px 20px; background: #00f2ff; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
+    /* TOOLKIT UI */
+    .container { max-width: 600px; margin: 0 auto; }
+    h1 { color: #00e0ff; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 20px; }
+    .card { background: #222; padding: 20px; border-radius: 10px; text-decoration: none; color: white; border: 1px solid #333; display: block; }
+    .card:hover { border-color: #00e0ff; }
+
+    /* LOCK SCREEN UI */
+    #lockScreen {
+        position: fixed; inset: 0; background: #000; z-index: 9999;
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .lock-box { background: #1a1a1a; padding: 30px; border: 2px solid red; border-radius: 15px; width: 90%; max-width: 400px; }
+    input { padding: 10px; width: 80%; margin-top: 15px; text-align: center; }
+    button { padding: 10px 20px; background: red; color: white; border: none; font-weight: bold; margin-top: 10px; cursor: pointer; }
 </style>
 </head>
 <body>
-    <div id="lock">
-        <h1 style="color:red">TRIAL EXPIRED ⛔</h1>
-        <p>Your 24 hours are over. Enter Key to Unlock.</p>
-        <input type="text" id="key" placeholder="Premium Key">
-        <button onclick="unlock()">UNLOCK</button>
+
+    <!-- LOCK OVERLAY -->
+    <div id="lockScreen">
+        <div class="lock-box">
+            <h1 style="margin:0">⛔ EXPIRED</h1>
+            <p>Your 24-Hour Trial has ended.</p>
+            <p style="color:#888; font-size:0.9rem;">Contact Owner to get Premium Key.</p>
+            
+            <input type="text" id="keyInput" placeholder="Enter Key Here">
+            <button onclick="unlock()">UNLOCK NOW</button>
+            <p id="msg" style="color:red; margin-top:10px;"></p>
+        </div>
     </div>
 
-    <h1 style="color:#00f2ff">${site}</h1>
-    <div class="grid">
-        ${tools.map(t => `<a href="${t.link}" class="card">${t.name}</a>`).join('')}
+    <!-- MAIN TOOLKIT -->
+    <div class="container">
+        <!-- SITE NAME (Important for Key) -->
+        <h1 id="siteTitle">AliTools</h1> 
+        
+        <div class="grid">
+            <a href="https://chat.openai.com" class="card">🤖 ChatGPT</a>
+            <a href="https://www.remove.bg" class="card">🖼️ BG Remover</a>
+            <a href="https://temp-mail.org" class="card">📧 Temp Mail</a>
+            <a href="#" class="card">🔥 More Tools</a>
+        </div>
+        
+        <p style="margin-top:50px; color:#555;">Powered by FAIZAN</p>
     </div>
 
-    <script>
-        const sName = "${site}";
-        const start = localStorage.getItem('time_' + sName) || Date.now();
-        localStorage.setItem('time_' + sName, start);
-        const isPrem = localStorage.getItem('prem_' + sName);
+<script>
+    // --- SETTINGS ---
+    const SITE_NAME = "AliTools"; // YE NAME CHANGE KARNAY PAR KEY BHI CHANGE HOGI
+    document.getElementById('siteTitle').innerText = SITE_NAME;
 
-        // CHECK 24 HOURS (86400000 ms)
-        if(!isPrem && (Date.now() - start > 86400000)) {
-            document.getElementById('lock').style.display = 'flex';
+    // --- LOCK LOGIC ---
+    const now = new Date().getTime();
+    const startKey = 'fz_start_' + SITE_NAME;
+    const premKey = 'fz_prem_' + SITE_NAME;
+
+    // 1. Check if already Premium
+    if(localStorage.getItem(premKey) !== "true") {
+        
+        // 2. Check Time
+        let startTime = localStorage.getItem(startKey);
+        if(!startTime) {
+            startTime = now;
+            localStorage.setItem(startKey, now);
         }
 
-        function unlock() {
-            // Simple key logic based on site name
-            const key = btoa(sName + "PREMIUM").substring(0,8);
-            if(document.getElementById('key').value === key) {
-                localStorage.setItem('prem_' + sName, "true");
-                alert("Unlocked Forever!");
-                location.reload();
-            } else {
-                alert("Wrong Key! Key is: " + key); // For testing, shows key
-            }
+        // 3. Compare Time (24 Hours = 86400000 ms)
+        // TEST MODE: 10 seconds (10000) change to 86400000 for 24h
+        if(now - startTime > 86400000) { 
+            document.getElementById('lockScreen').style.display = 'flex';
         }
-    <\/script>
-</body>
-</html>`;
-
-        document.getElementById('finalCode').value = code;
-        document.getElementById('modal').style.display = 'flex';
     }
 
-    function copyCode() {
-        document.getElementById('finalCode').select();
-        document.execCommand('copy');
-        alert("Copied!");
-    }
-    function closeModal() {
-        document.getElementById('modal').style.display = 'none';
+    function unlock() {
+        const input = document.getElementById('keyInput').value;
+        const msg = document.getElementById('msg');
+
+        // KEY GENERATION LOGIC (Matches Admin Panel)
+        const correctKey = btoa(SITE_NAME + "FAIZAN_SECRET_SYSTEM_2025").substring(0, 12);
+
+        if(input === correctKey) {
+            localStorage.setItem(premKey, "true");
+            alert("✅ APPROVED! Website Unlocked.");
+            location.reload();
+        } else {
+            msg.innerText = "Invalid Key!";
+        }
     }
 </script>
 </body>
