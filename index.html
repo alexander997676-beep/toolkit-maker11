@@ -3,85 +3,226 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Toolkit</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <title>FAIZAN ADMIN OS - TOOLKIT MAKER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Outfit:wght@300;500;800&display=swap" rel="stylesheet">
     <style>
-        body { background: #111; color: white; font-family: sans-serif; padding: 20px; text-align: center; }
-        input { padding: 10px; width: 80%; margin: 10px 0; }
-        button { padding: 15px; background: #00e0ff; border: none; cursor: pointer; font-weight: bold; width: 80%; }
-        textarea { width: 80%; height: 100px; margin-top: 20px; background: black; color: #0f0; }
+        :root {
+            --bg: #030005;
+            --primary: #00f2ff;
+            --secondary: #7000ff;
+            --text: #fff;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; padding: 0;
+            background: var(--bg); color: var(--text);
+            font-family: 'Outfit', sans-serif;
+            background-image: radial-gradient(circle at 50% 50%, #1a0b2e 0%, #000 100%);
+            min-height: 100vh;
+        }
+
+        /* --- TOP URL BAR --- */
+        .url-header {
+            background: rgba(0, 242, 255, 0.1);
+            border-bottom: 1px solid var(--primary);
+            padding: 10px; text-align: center;
+            display: none; /* Initial Hidden */
+        }
+        .url-box {
+            background: #000; border: 1px dashed var(--primary);
+            padding: 8px 15px; border-radius: 5px; color: var(--primary);
+            font-family: monospace; display: inline-block; margin-top: 5px;
+        }
+
+        /* --- AUTH BOX --- */
+        .auth-container {
+            width: 350px; background: rgba(10, 10, 15, 0.9);
+            border: 1px solid var(--primary); border-radius: 15px; padding: 25px;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            text-align: center; box-shadow: 0 0 30px rgba(0, 242, 255, 0.2);
+        }
+
+        .auth-input { width: 100%; padding: 12px; margin-bottom: 10px; background: #000; border: 1px solid #333; color: white; border-radius: 5px; outline: none; }
+        .btn { width: 100%; padding: 12px; background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; color: white; font-weight: bold; cursor: pointer; border-radius: 5px; }
+
+        /* --- DASHBOARD --- */
+        #dashScreen { display: none; padding: 20px; }
+        .maker-card {
+            background: #0a0a0f; border: 1px solid #333; border-radius: 15px;
+            padding: 20px; max-width: 800px; margin: 20px auto;
+        }
+
+        .tool-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 20px; }
+        .tool-card { background: #111; border: 1px solid #333; border-radius: 10px; padding: 10px; text-align: center; position: relative; }
+        .tool-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 5px; }
+        .tool-card h4 { margin: 10px 0 5px 0; font-size: 0.9rem; }
+        .del-btn { position: absolute; top: 5px; right: 5px; color: red; background: none; border: none; font-weight: bold; cursor: pointer; }
+
+        /* --- VISITOR SCREEN --- */
+        #visitorScreen { display: none; text-align: center; padding: 50px; }
     </style>
 </head>
 <body>
 
-    <h1>🛠️ Create Your Toolkit</h1>
-    <input type="text" id="sName" placeholder="Website Name (Unique)">
-    <button onclick="createSite()">CREATE & GENERATE CODE</button>
-    
-    <textarea id="output" placeholder="Code will appear here..."></textarea>
-
-    <script>
-        // --- ⚠️ WAHI SAME FIREBASE CONFIG YAHAN BHI DALEN ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyD...",
-            authDomain: "your-project.firebaseapp.com",
-            databaseURL: "https://your-project-default-rtdb.firebaseio.com",
-            projectId: "your-project",
-            storageBucket: "your-project.appspot.com",
-            messagingSenderId: "123...",
-            appId: "1:123..."
-        };
-        // ----------------------------------------------------
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        function createSite() {
-            const name = document.getElementById('sName').value.trim();
-            if(!name) return alert("Please enter website name");
-
-            // 1. Send Data to Admin
-            db.ref('sites').push({
-                name: name,
-                time: Date.now()
-            });
-
-            // 2. Generate Code (Standard Locked Code)
-            const code = `<!DOCTYPE html>
-<html>
-<head><title>${name}</title></head>
-<body style="background:black; color:white; text-align:center;">
-    <h1>${name}</h1>
-    <div id="lock" style="display:none; position:fixed; inset:0; background:black; align-items:center; justify-content:center; flex-direction:column;">
-        <h2 style="color:red">LOCKED</h2>
-        <input id="k" placeholder="Key"><button onclick="u()">Unlock</button>
+    <!-- TOP LINK BAR -->
+    <div id="urlBar" class="url-header">
+        <div style="font-size: 0.8rem; font-weight: bold;">🌍 YOUR PUBLIC TOOLKIT LINK:</div>
+        <div class="url-box" id="myPublicUrl">Loading...</div>
+        <button onclick="copyUrl()" style="background:none; border:none; color:white; cursor:pointer; font-size: 0.8rem; text-decoration: underline; margin-left: 10px;">Copy Link</button>
     </div>
-    <script>
-        // LOCK LOGIC
-        const n = "${name}";
-        const t = localStorage.getItem('t_'+n) || Date.now();
-        localStorage.setItem('t_'+n, t);
-        
-        // 24 Hours Check
-        if(Date.now() - t > 86400000 && !localStorage.getItem('p_'+n)) {
-            document.getElementById('lock').style.display = 'flex';
-        }
 
-        function u() {
-            // Check Key
-            if(document.getElementById('k').value === btoa(n+"FAIZAN_SECRET_SYSTEM_2025").substring(0,12)) {
-                localStorage.setItem('p_'+n, "1"); location.reload();
-            } else alert("Wrong Key");
+    <!-- AUTH SCREEN -->
+    <div id="authScreen" class="auth-container">
+        <h2 style="color:var(--primary); font-family: 'Rajdhani'; margin-top:0;">FAIZAN OS</h2>
+        <div id="loginForm">
+            <input type="text" id="lUser" class="auth-input" placeholder="Username">
+            <input type="password" id="lPass" class="auth-input" placeholder="Password">
+            <button class="btn" onclick="login()">LOGIN</button>
+            <p onclick="toggle(true)" style="cursor:pointer; font-size:0.8rem;">New? Create Account</p>
+        </div>
+        <div id="signupForm" style="display:none">
+            <input type="text" id="sUser" class="auth-input" placeholder="Choose Username">
+            <input type="password" id="sPass" class="auth-input" placeholder="Create Password">
+            <button class="btn" onclick="signup()">SIGN UP</button>
+            <p onclick="toggle(false)" style="cursor:pointer; font-size:0.8rem;">Login instead</p>
+        </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashScreen">
+        <div style="display:flex; justify-content: space-between; align-items: center; max-width: 800px; margin: auto;">
+            <h3>🛠️ Toolkit Maker</h3>
+            <button onclick="logout()" style="background:red; border:none; color:white; padding:5px 10px; cursor:pointer; border-radius:4px;">Logout</button>
+        </div>
+
+        <div class="maker-card">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <input type="text" id="tName" class="auth-input" placeholder="Tool Name">
+                <input type="text" id="tLink" class="auth-input" placeholder="Tool Link (https://...)">
+            </div>
+            <input type="text" id="tImg" class="auth-input" placeholder="Tool Image URL (e.g. from Google or Imgur)">
+            <button class="btn" onclick="addTool()">+ ADD TOOL TO MY PAGE</button>
+
+            <h4 style="margin-top:30px; color:var(--primary); border-bottom:1px solid #333;">Your Current Toolkit</h4>
+            <div class="tool-grid" id="toolList"></div>
+        </div>
+    </div>
+
+    <!-- VISITOR VIEW -->
+    <div id="visitorScreen">
+        <h1 id="vTitle" style="color:var(--primary); font-family: 'Rajdhani'; font-size: 2.5rem;"></h1>
+        <div class="tool-grid" id="vGrid" style="max-width: 900px; margin: auto;"></div>
+    </div>
+
+<script>
+    let user = "";
+    let toolkit = [];
+
+    window.onload = function() {
+        const hash = window.location.hash.substring(1);
+        if(hash) {
+            user = hash;
+            loadData();
+            if(sessionStorage.getItem('faizan_active') === user) {
+                showDashboard();
+            } else {
+                showVisitor();
+            }
         }
-    <\/script>
-</body>
-</html>`;
-            
-            document.getElementById('output').value = code;
-            alert("Site Created! Admin has received your request.");
-        }
-    </script>
+    }
+
+    function toggle(s) {
+        document.getElementById('signupForm').style.display = s ? 'block' : 'none';
+        document.getElementById('loginForm').style.display = s ? 'none' : 'block';
+    }
+
+    function signup() {
+        const u = document.getElementById('sUser').value.trim();
+        const p = document.getElementById('sPass').value;
+        if(!u || !p) return;
+        localStorage.setItem('f_user_' + u, p);
+        startSession(u);
+    }
+
+    function login() {
+        const u = document.getElementById('lUser').value.trim();
+        const p = document.getElementById('lPass').value;
+        if(localStorage.getItem('f_user_' + u) === p) {
+            startSession(u);
+        } else { alert("Wrong ID/Pass"); }
+    }
+
+    function startSession(u) {
+        user = u;
+        sessionStorage.setItem('faizan_active', u);
+        window.location.hash = u;
+        showDashboard();
+    }
+
+    function logout() {
+        sessionStorage.clear();
+        window.location.hash = "";
+        location.reload();
+    }
+
+    function showDashboard() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('visitorScreen').style.display = 'none';
+        document.getElementById('dashScreen').style.display = 'block';
+        document.getElementById('urlBar').style.display = 'block';
+        
+        // Update URL display
+        const currentUrl = window.location.href.split('#')[0] + "#" + user;
+        document.getElementById('myPublicUrl').innerText = currentUrl;
+        
+        loadData();
+        render(true);
+    }
+
+    function showVisitor() {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('dashScreen').style.display = 'none';
+        document.getElementById('visitorScreen').style.display = 'block';
+        document.getElementById('vTitle').innerText = user.toUpperCase() + "'S TOOLKIT";
+        render(false);
+    }
+
+    function addTool() {
+        const n = document.getElementById('tName').value;
+        const l = document.getElementById('tLink').value;
+        const i = document.getElementById('tImg').value || "https://via.placeholder.com/150?text=Tool";
+        if(!n || !l) return;
+        toolkit.push({ n, l, i });
+        saveData();
+        render(true);
+        document.getElementById('tName').value = ""; document.getElementById('tLink').value = ""; document.getElementById('tImg').value = "";
+    }
+
+    function saveData() { localStorage.setItem('f_data_' + user, JSON.stringify(toolkit)); }
+    function loadData() { toolkit = JSON.parse(localStorage.getItem('f_data_' + user) || "[]"); }
+
+    function render(isAdmin) {
+        const target = isAdmin ? document.getElementById('toolList') : document.getElementById('vGrid');
+        target.innerHTML = "";
+        toolkit.forEach((t, index) => {
+            target.innerHTML += `
+                <div class="tool-card">
+                    ${isAdmin ? `<button class="del-btn" onclick="del(${index})">×</button>` : ''}
+                    <img src="${t.i}">
+                    <h4>${t.n}</h4>
+                    <a href="${t.l}" target="_blank" class="btn" style="display:block; text-decoration:none; font-size:0.7rem; padding:5px;">OPEN</a>
+                </div>`;
+        });
+    }
+
+    function del(idx) { toolkit.splice(idx, 1); saveData(); render(true); }
+
+    function copyUrl() {
+        const url = document.getElementById('myPublicUrl').innerText;
+        navigator.clipboard.writeText(url);
+        alert("Link Copied!");
+    }
+</script>
 </body>
 </html>
